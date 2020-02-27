@@ -8,6 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
+
+set.seed(2019)
 ```
 
 
@@ -65,6 +67,26 @@ x %>%
 # Assume that John Mark is honest. Yeah! How surprising is it to roll 6 winners?
 # How unusual is it to win against Ishan 4 to 0?
 
+# play_6_rounds <- function(){
+games = 10000
+contest_size = 6
+n <- games * contest_size
+
+
+outcomes <- tibble(p_IB = map_int(1:n, ~ roll_two_dice()),
+                p_JM = map_int(1:n, ~ roll_two_dice())) %>%
+  mutate(IB_craps = p_IB %in% c(7,11),
+         JM_craps = p_JM %in% c(7,11)) %>%
+  mutate(winner = ifelse(IB_craps == JM_craps, 'Tie',
+                  ifelse(IB_craps == TRUE, 'IB', 'JM')),
+         contest = rep(1:games, each = contest_size)) %>%
+  group_by(contest) %>%
+  summarize(JM_wins = sum(winner == 'JM'),
+            IB_wins = sum(winner == 'IB'))
+
+ggplot(outcomes, aes(JM_wins)) +
+  geom_histogram(bins = 6)
+# }
 
 ```
 
